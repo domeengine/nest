@@ -1,4 +1,4 @@
-# NEST - Natural EGG Software Trunk
+# NEST - Natural Entertainment Software Trunk
 
 NEST allows game code and assets to be bundled for easy distribution with the DOME engine.
 
