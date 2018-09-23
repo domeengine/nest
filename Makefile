@@ -1,5 +1,4 @@
-src = src/$(wildcard *.c)
-obj = $(src:.c=.o)
+src = $(wildcard src/*.c)
 
 CFLAGS = -std=c99 -pedantic -Wall
 INCLUDES = -Ilib/microtar/src
@@ -10,4 +9,4 @@ nest: $(src)
 
 .PHONY: clean
 clean:
-	rm -f $(obj) nest
+	rm -f nest
