@@ -8,8 +8,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "microtar.h"
-#include "microtar.c"
+#include <microtar.h>
+#include <microtar.c>
 #include "io.c"
 
 typedef enum { MODE_NONE, MODE_ZIP, MODE_EXTRACT } MODE;
