@@ -2,6 +2,14 @@
 
 NEST allows game code and assets to be bundled for easy distribution with the DOME engine.
 
+## Build Info:
+
+```
+> git submodule init
+> git submodule update
+> make
+```
+
 ## Usage
 
 `./nest [options] -o bundle-file -- [files | directories]`

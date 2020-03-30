@@ -1,3 +1,3 @@
-[submodule "src/tools/nest/lib/microtar"]
-	path = src/tools/nest/lib/microtar
+[submodule "lib/microtar"]
+	path = lib/microtar
 	url = https://github.com/rxi/microtar.git
