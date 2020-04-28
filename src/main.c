@@ -21,18 +21,15 @@ void loadAndWriteFileToTar(mtar_t* tar, char* filePath) {
   mtar_write_data(tar, inputFile, length);
 }
 
-void listDir(mtar_t* tar, char* directory, char* subtract) {
+void listDir(mtar_t* tar, char* directory, size_t start) {
     struct dirent *de;  // Pointer for directory entry
-    if (subtract == NULL) {
-      subtract = directory;
-    }
 
     // opendir() returns a pointer of DIR type.
     DIR *dr = opendir(directory);
 
     if (dr == NULL)  // opendir returns NULL if couldn't open directory
     {
-        printf("Could not open current directory" );
+        printf("Could not open current directory");
     }
 
     // Refer http://pubs.opengroup.org/onlinepubs/7990989775/xsh/readdir.html
@@ -40,31 +37,33 @@ void listDir(mtar_t* tar, char* directory, char* subtract) {
     while ((de = readdir(dr)) != NULL) {
       if ((strcmp(de->d_name, ".") != 0) && (strcmp(de->d_name, "..") != 0)) {
         char path[PATH_MAX];
-        snprintf(path, PATH_MAX, "%s/%s", directory, de->d_name);
-        char* finalFileName = path + strlen(subtract);
-        size_t length;
-        char* inputFile = readEntireFile(path, &length);
-        printf ("Bundling: %s\n", path);
+
+        strcpy(path, directory);
+        strcat(path, "/");
+        strcat(path, de->d_name);
 
         if (((de->d_type & DT_DIR) != 0) && (strncmp(de->d_name, ".", 1) != 0)) {
-          mtar_write_dir_header(tar, finalFileName);
-          listDir(tar, path, subtract);
+          listDir(tar, path, start);
         } else {
-          mtar_write_file_header(tar, finalFileName, length);
+
+          size_t length;
+          char* inputFile = readEntireFile(path, &length);
+          printf("Bundling: %s\n", path);
+
+          mtar_write_file_header(tar, path + start, length);
           mtar_write_data(tar, inputFile, length);
         }
       }
     }
 
     closedir(dr);
-
 }
 
 int main(int argc, char **argv) {
   char* tarFileName = NULL;
   int mode = 0;
   int c;
-  while ((c = getopt (argc, argv, "vzxo:")) != -1) {
+  while ((c = getopt(argc, argv, "vzxo:")) != -1) {
     switch(c) {
       case 'v': printf("NEST v1.0.0\n"); break;
       case 'o': tarFileName = optarg; break;
@@ -87,20 +86,25 @@ int main(int argc, char **argv) {
     mtar_t tar;
     /* Open archive for writing */
     mtar_open(&tar, tarFileName, "w");
-    printf("%d\n", (argc - optind));
     bool singleFile = (argc - optind) == 1;
 
     for (int index = optind; index < argc; index++) {
       char path[PATH_MAX];
-      snprintf(path, PATH_MAX, "./%s", argv[index]);
+      snprintf(path, PATH_MAX, "%s", argv[index]);
 
       struct stat path_stat;
       stat(path, &path_stat);
       bool isFile = S_ISREG(path_stat.st_mode);
       if (!isFile) {
-        listDir(&tar, path, singleFile ? NULL : "");
+        int last = strlen(path) - 1;
+        if (path[last] == '/')
+        {
+          path[last] = '\0';
+        }
+        size_t start = singleFile ? strlen(path) + 1 : 0;
+        listDir(&tar, path, start);
       } else {
-        printf ("Bundling: %s\n", path);
+        printf("Bundling: %s\n", path);
         loadAndWriteFileToTar(&tar, path);
       }
     }
