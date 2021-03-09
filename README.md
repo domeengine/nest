@@ -15,9 +15,11 @@ NEST allows game code and assets to be bundled for easy distribution with the DO
 `./nest [options] -o bundle-file -- [files | directories]`
 
 Options:
-* `-z` will create a bundle
-* `-x` is reserved to unzip a bundle in the future
+* `-h` will display information about usage and the options.
+* `-z` will create a bundle.
+* `-x` is reserved to unzip a bundle in the future.
 * `-v` will print the version of the bundler.
+* `-d` will include files starting with a dot such as `.DS_Store`.
 
 This will create a bundle named "bundle-file" containing the various files and directories specified.
 If the only item to bundle is a directory, the bundle will be created as if the directory was the root.
