@@ -21,7 +21,7 @@ void loadAndWriteFileToTar(mtar_t* tar, char* filePath) {
   mtar_write_data(tar, inputFile, length);
 }
 
-void listDir(mtar_t* tar, char* directory, size_t start) {
+void listDir(mtar_t* tar, char* directory, size_t start, int skipDot) {
     struct dirent *de;  // Pointer for directory entry
 
     // opendir() returns a pointer of DIR type.
@@ -43,8 +43,11 @@ void listDir(mtar_t* tar, char* directory, size_t start) {
         strcat(path, de->d_name);
 
         if (((de->d_type & DT_DIR) != 0) && (strncmp(de->d_name, ".", 1) != 0)) {
-          listDir(tar, path, start);
+          listDir(tar, path, start, skipDot);
         } else {
+          if (skipDot && de->d_name[0] == '.') {
+            continue;
+          }
 
           size_t length;
           char* inputFile = readEntireFile(path, &length);
@@ -59,14 +62,28 @@ void listDir(mtar_t* tar, char* directory, size_t start) {
     closedir(dr);
 }
 
+void printHelp() {
+  printf("Usage:\n");
+  printf("nest [options] -o bundle-file -- [files | directories]\n\n");
+  printf("Options:\n");
+  printf("\t-h will display information about usage and the options.\n");
+  printf("\t-z will create a bundle.\n");
+  printf("\t-x is reserved to unzip a bundle in the future.\n");
+  printf("\t-v will print the version of the bundler.\n");
+  printf("\t-d will include files starting with a dot such as .DS_Store.\n");
+}
+
 int main(int argc, char **argv) {
   char* tarFileName = NULL;
   int mode = 0;
+  int skipDot = 1;
   int c;
-  while ((c = getopt(argc, argv, "vzxo:")) != -1) {
+  while ((c = getopt(argc, argv, "hvzxdo:")) != -1) {
     switch(c) {
       case 'v': printf("NEST v1.0.0\n"); break;
+      case 'h': printHelp(); break;
       case 'o': tarFileName = optarg; break;
+      case 'd': skipDot = 0; break;
       case 'z':
                 if (mode != 0) { abort(); }
                 mode = MODE_ZIP;
@@ -102,7 +119,7 @@ int main(int argc, char **argv) {
           path[last] = '\0';
         }
         size_t start = singleFile ? strlen(path) + 1 : 0;
-        listDir(&tar, path, start);
+        listDir(&tar, path, start, skipDot);
       } else {
         printf("Bundling: %s\n", path);
         loadAndWriteFileToTar(&tar, path);
