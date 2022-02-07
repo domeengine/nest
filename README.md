@@ -1,3 +1,5 @@
+> **\[This is deprecated. NEST is now built into [DOME Engine](https://domeengine.com).\]**
+
 # NEST - Natural Entertainment Software Trunk
 
 NEST allows game code and assets to be bundled for easy distribution with the DOME engine.
